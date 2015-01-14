@@ -64,11 +64,11 @@ typedef struct LogStructure{
 #define MAX_VAL 9999999
 
 //char* graph_file_name = "/home/zhou/workspace/splex-unfix/graph_test.clq";
-char graph_file_name[1000]="/home/zhou/benchmarks/dimacs/p_hat300-2.clq";
+char graph_file_name[1000]="/home/zhou/splex/benchmarks/dimacs/MANN_a27.clq";
 int param_s = 3;
 int param_max_iteration = 100000000;
 int param_runcnt = 10;
-int param_best = 34;
+int param_best = 351;
 int param_cycle = 10000;
 
 FILE *frec;
@@ -103,12 +103,6 @@ int maxAdjValue = -1;
 int vmax = -1;
 int** inAdjMatrix;
 int *inAdjSize;
-int dbg_a = 0;
-int dbg_b = 0;
-int min_dbga = MAX_VAL;
-int min_dbgb = MAX_VAL;
-int max_dbga = 0;
-int max_dbgb = 0;
 
 
 
@@ -476,7 +470,7 @@ void drop(int v){
 /*
  * Save current solution to plex
  */
-void saveCurentSolution(Plex *plex){
+inline void saveCurentSolution(Plex *plex){
 	plex->size = in_size;
 #if (DETAIL)
 	int cnt = 0;
@@ -517,29 +511,24 @@ void initConnectTable(int iter){
 	maxAdjValue = -1;
 	vmax = -1;
 	memset(inAdjSize , 0,  sizeof(int) * cpl_g->v_num);
-	dbg_a = 0;
-	dbg_b = 0;
 }
 
 int evaluateVertex(int iter, int vertex, int *inside){
-	dbg_a++;
 	for (int i = 0; i < vinfo[vertex].in_deg; i++){
-		int vadj = Adj_in(vertex, i);
-		if (inAdjSize[vadj] >= 1){
-			for (int i = 0; i < inAdjSize[vadj];i++){
-				/*Only when two vertices are not connected and the inside neigbor is a saturated vertex*
-				 * can the two vertices be switched inside at the same time*/
-				if (!(cpl_g->matrix[vertex][inAdjMatrix[vadj][i]])){
-					*inside = vadj;
-					return inAdjMatrix[vadj][i];
+		int vin = Adj_in(vertex, i);
+		if (inAdjSize[vin] >= 1){
+			for (int i = 0; i < inAdjSize[vin];i++){
+				/*Only when two vertices are not connected and their common inside neigbor is a saturated vertex*
+				 * can the two vertices be possible switched inside at the same time*/
+				if (!(cpl_g->matrix[vertex][inAdjMatrix[vin][i]])){
+					*inside = vin;
+					return inAdjMatrix[vin][i];
 				}
 			}
 		}
 		//此处还需要争对s>=2的情况仔细考虑比较
-		if (vinfo[vadj].in_deg == param_s - 1){
-			inAdjMatrix[vadj][inAdjSize[vadj]++] = vertex;
-			//TODO:DEBUG
-			if (inAdjSize[vadj] == 1)	dbg_b++;
+		if (vinfo[vin].in_deg == param_s - 1){
+			inAdjMatrix[vin][inAdjSize[vin]++] = vertex;
 		}
 	}
 	return -1;
@@ -742,13 +731,15 @@ void createInitSolution(){
  * max_unimprove, the maximum unimproved iterator
  * maxiter, the maximum iteration times
  */
-void solve_tabu(int max_unimprove, int maxiter, Plex *final_best){
+void solve_tabu(int iter_per_start, int maxiter, Plex *final_best){
 	int iter = 0;
 	int end = 0;
 	int restart = 0;
 	final_best->size = 0;
+#if (DEBUG)
 	if (final_best->verlist == NULL)
 		final_best->verlist = new int[cpl_g->v_num];
+#endif
 	clearlog();
 
 	allocateMemory();
@@ -760,12 +751,11 @@ void solve_tabu(int max_unimprove, int maxiter, Plex *final_best){
 		initializeSearch();
 		createInitSolution();
 		saveCurentSolution(&cur_best);
-		restart++;
 
 		int no_improve_iter = 0;
-		int tabu_iter = 0;
-//		while (no_improve_iter < max_unimprove){
-		while (tabu_iter < max_unimprove && (float)(clock() - start_time) / CLOCKS_PER_SEC < 6000){
+		int tabu_iter = 0; 	//iteration counter in each restart
+//		while (no_improve_iter < iter_per_start){
+		while (tabu_iter < iter_per_start && (float)(clock() - start_time) / CLOCKS_PER_SEC < 6000){
 #if (TABU)
 			int move = localDirectTabuMove(iter);
 #else
@@ -776,23 +766,23 @@ void solve_tabu(int max_unimprove, int maxiter, Plex *final_best){
 			if (in_size > cur_best.size){
 				saveCurentSolution(&cur_best);
 				no_improve_iter = 0;
-				if (in_size >= param_best){
-					end = 1;
-					break;
-				}
 			}else{
 				no_improve_iter++;
 			}
+			/*Print information*/
+			if (iter % 10000 == 0){
+				printf("%d: current %d,current best %d, final best %d\n", iter, in_size,cur_best.size,
+						final_best->size);
+			}
 			tabu_iter++;
 			iter++;
-			if (iter % 100000 == 0){
-				printf("%d: current %d, best %d\n", iter, in_size,final_best->size);
-			}
-			if (iter >= maxiter){
+			/*If global optimum is found or execeed the max iteration, stop*/
+			if (cur_best.size >= param_best || iter >= maxiter){
 				end = 1;
 				break;
 			}
 		}
+		restart++;
 		if (cur_best.size > final_best->size){
 			final_best->size = cur_best.size;
 #if (DETAIL)
@@ -858,7 +848,7 @@ int main(int argc, char** argv){
 	prun_g = new GraphType;
 	cpl_g = new GraphType;
 
-//	srand((unsigned int)time(NULL));
+	srand((unsigned int)time(NULL));
 	readParameters(argc, argv);
 	frec = createRecordFile();
 //	frec = stdout;
@@ -911,7 +901,8 @@ int main(int argc, char** argv){
 	long long int sum_iter = 0;
 	fprintf(frec, "No.\t size\t Btime\t time\t Biter\t iter\t restart\t iter_time\n " );
 	for (int i = 0; i < param_runcnt; i++){
-		fprintf(frec, "%d\t %d\t %.2f\t %.2f\t %d\t %d\t \%d\t %.2f\n", i+1,
+		fprintf(frec, "%d\t %d\t %.2f\t %.2f\t %d\t %d\t \%d\t %.2f\n",
+				i+1,
 				all_best[i].size,
 				all_log[i].best_found_time,
 				all_log[i].total_time,

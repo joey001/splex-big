@@ -29,7 +29,7 @@ def loadGraph(file):
     return G
 
 # g = loadGraph('/home/zhou/workspace/splex-unfix/graph_test.clq')
-g = loadGraph('/home/zhou/benchmarks/MANN_a9.clq')
+g = loadGraph('/home/zhou/splex/benchmarks/dimacs/MANN_a9.clq')
 
 # nx.draw_spectral(g)
 # plt.show()

@@ -83,33 +83,40 @@ for line in org_table.splitlines():
     fileinfo = {'node':nodenum, 'edge':edgenum, 'desity':density, 's1':s1, \
                 's2':s2,'s3':s3,'s4':s4,'s5':s5}
     config[filename] = fileinfo
-Baulas_list = ['MANN_a27.clq','MANN_a9.clq','brock200_1.clq',
+#-----------------------------------config----------------------------------
+import os
+import os.path
+#load config
+# srange=[1,2,3,4,5]
+srange=[1,2,3,4,5]
+runcnt = 10
+command_file = 'commands.txt'
+#Baulas_list
+select_instances  = ['MANN_a27.clq','MANN_a9.clq','brock200_1.clq',
                'c-fat200-1.clq','c-fat200-2.clq','c-fat500-1.clq',
                'c-fat500-10.clq','c-fat500-2.clq','c-fat500-5.clq',
                'hamming6-2.clq','hamming6-4.clq','hamming8-2.clq',
                'hamming8-4.clq','johnson16-2-4.clq','johnson8-2-4.clq',
                'johnson8-4-4.clq','keller4.clq']
-#-----------------------------------config----------------------------------
-
-import os.path
-#load config
-# srange=[1,2,3,4,5]
-srange=[1,2,3,4,5]
-ins_dir = "/home/zhou/benchmarks/"
-runcnt = 10
-command_file = 'commands.txt'
 
 
-insfilter = lambda x: x.endswith('clq') or x.endswith('graph')
-ins_files = filter(insfilter, os.listdir(ins_dir))
+#----------------------------------------------------------------------
+bench_dir = "/home/zhou/splex/benchmarks"
+files_dict = {}
+for root, dir, files in os.walk(bench_dir):
+    for file in files:
+        if file.endswith('.clq') or file.endswith('.graph') or file.endswith('.txt'):
+            files_dict[file] = os.path.join(root, file)
 outf = open(command_file,'w+')
 #outf.write('#format:[H\E] ./splex [-f filename] [-s plex] [-r runcount] [-b bes_known]\n')
 # for f in ins_files:
-for f in Baulas_list:
-    if f not in config:
-        print '%s not exist,ignore'%f
+for f in select_instances:
+    if f not in files_dict.keys():
+        print '%s could not find in the benchmarks'%f
+    elif f not in config.keys():
+        print '%s not configured'%f
     else:
-        fpath = os.path.join(ins_dir, f)
+        fpath = files_dict[f]
         for s in srange:
             #tasks whose best value are max_value are believed to be hard tasks,(or time consuming tasks)
             pre_time = 'E'

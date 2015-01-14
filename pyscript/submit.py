@@ -68,7 +68,7 @@ else:
 
 #deploy   
 now = datetime.datetime.now()
-record = file('%d%d-%d:%d:%d.record'%(now.month,now.day,now.hour,now.minute,now.second),'w')
+record = file('z%d%d-%d:%d:%d.record'%(now.month,now.day,now.hour,now.minute,now.second),'w')
 
 hard_index = 0
 easy_index = 0
@@ -91,12 +91,11 @@ for no_core in range(core_num):
     else:
         content_list.append(easy_cmds[easy_index])
         easy_index+=1
-    jobname = '%d%d%d%d_%d'%(now.month,now.day,now.hour,now.minute,no_core+1)
+    jobname = 'j%d%d%d_%d'%(now.day,now.hour,now.minute,no_core+1)
     rt = subtask(jobname, content_list)
     
     record.write('job %s\n'%jobname)
-    if rt == 0:
-        for line in content_list:
-            record.write(line+'\n')
+    for line in content_list:
+        record.write(line+'\n')
 record.close()
         

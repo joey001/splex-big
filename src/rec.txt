@@ -1,8 +1,0 @@
-void shuffle(int* randlist, int len){
-	for (int idx = 0; idx < len; idx++){
-		int randid = rand() % len;
-		int tmp = randlist[idx];
-		randlist[idx] = randlist[randid];
-		randlist[randid] = tmp;
-	}
-}
