@@ -43,8 +43,6 @@ def subtask(jobname, content_list):
     os.remove(shfilename)
     return rt
 
-
-
 #Calcute the number of cores    
 cmds_list = file(cmd_file_name,'r').read().splitlines()
 hard_cmds = [line[2:] for line in cmds_list if line.startswith('H')]

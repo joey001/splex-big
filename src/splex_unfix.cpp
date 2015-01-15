@@ -64,11 +64,11 @@ typedef struct LogStructure{
 #define MAX_VAL 9999999
 
 //char* graph_file_name = "/home/zhou/workspace/splex-unfix/graph_test.clq";
-char graph_file_name[1000]="/home/zhou/splex/benchmarks/dimacs/MANN_a27.clq";
-int param_s = 3;
+char graph_file_name[1000]="/home/zhou/splex/benchmarks/dimacs/hamming6-4.clq";
+int param_s = 1;
 int param_max_iteration = 100000000;
 int param_runcnt = 10;
-int param_best = 351;
+int param_best = 4;
 int param_cycle = 10000;
 
 FILE *frec;
@@ -736,7 +736,7 @@ void solve_tabu(int iter_per_start, int maxiter, Plex *final_best){
 	int end = 0;
 	int restart = 0;
 	final_best->size = 0;
-#if (DEBUG)
+#if (DETAIL)
 	if (final_best->verlist == NULL)
 		final_best->verlist = new int[cpl_g->v_num];
 #endif
