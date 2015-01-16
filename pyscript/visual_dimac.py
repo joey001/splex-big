@@ -37,12 +37,6 @@ splex = [int(no)-1 for no in text.split(' ')]
 gsplex = cg.subgraph(splex)
 nx.draw_random(gsplex)
 
-# nx.draw_spectral(g)
-# plt.show()
-# nx.draw_circular(cg)
-# nx.draw_spectral(cg)
-# nx.draw_graphviz(cg)
-# nx.draw_spring(cg)
 
 # divide the graph into two parts
 if 0:

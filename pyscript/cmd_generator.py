@@ -100,8 +100,8 @@ Baulas_list  = ['MANN_a27.clq','MANN_a9.clq','brock200_1.clq',
                 'hamming6-2.clq','hamming6-4.clq','hamming8-2.clq',
                 'hamming8-4.clq','johnson16-2-4.clq','johnson8-2-4.clq',
                 'johnson8-4-4.clq','keller4.clq']
-hard_clique_list = ['brock400_2.clq','brock400_4.clq', 'brock800_2.clq','brock800_4.clq','C2000.9.clq',\
-         'C4000.5.clq','MANN_a45.clq', 'MANN_a81.clq','keller6.clq','brock800_1.clq']
+hard_clique_list = ['brock400_2.clq','brock400_4.clq', 'brock800_1.clq', 'brock800_2.clq','brock800_4.clq','C2000.9.clq',\
+         'C4000.5.clq','MANN_a45.clq', 'MANN_a81.clq','keller6.clq']
 #-----------------------------------config----------------------------------
 import os
 import os.path
@@ -109,10 +109,9 @@ import os.path
 # srange=[1,2,3,4,5]
 srange=[1,2,3,4,5]
 runcnt = 10
-command_file = 'commands.txt'
-select_instances = hard_clique_list
-
+select_instances = ['brock400_2.clq','brock400_4.clq', 'brock800_1.clq', 'brock800_2.clq','brock800_4.clq']
 bench_dir = "/home/zhou/splex/benchmarks"
+
 #----------------------------------------------------------------------
 
 files_dict = {}
@@ -120,7 +119,7 @@ for root, dir, files in os.walk(bench_dir):
     for file in files:
         if file.endswith('.clq') or file.endswith('.graph') or file.endswith('.txt'):
             files_dict[file] = os.path.join(root, file)
-outf = open(command_file,'w+')
+outf = open('cmd.txt','w+')
 #outf.write('#format:[H\E] ./splex [-f filename] [-s plex] [-r runcount] [-b bes_known]\n')
 # for f in ins_files:
 for f in select_instances:
@@ -132,14 +131,16 @@ for f in select_instances:
         fpath = files_dict[f]
         for s in srange:
             #tasks whose best value are max_value are believed to be hard tasks,(or time consuming tasks)
-            pre_time = 'E'
-            if config[f]['s%d'%s] == max_value:
-                pre_time = 'H'
-            if f.endswith('graph'):
+            if f.endswith('graph') or f.endswith('txt'):
                 g_size = 2000
             else:
-                g_size = 4000           
-            command = '%s ./splex -f %s -s %d -r %d -p %d -b %d \n'%(pre_time, fpath, s, runcnt, g_size,config[f]['s%d'%s])
+                g_size = 4000  
+            if f.startswith('brock'):
+                cycle = 100
+            else:
+                cycle = 10000          
+            command = './splex -f %s -s %d -r %d -p %d -c %d -b %d \n'%(fpath, s, runcnt,
+                                                                           g_size,cycle, config[f]['s%d'%s])
             outf.write(command)
 outf.close()
                                                         
