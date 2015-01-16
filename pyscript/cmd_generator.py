@@ -4,7 +4,7 @@ This scipt generate running files
 @author: zhou
 '''
 max_value = 99999
-org_table = '''MANN_a9.clq 45 918 92.73 16 26 36 36 44
+opt_table = '''MANN_a9.clq 45 918 92.73 16 26 36 36 44
 MANN_a27.clq 378 70551 99.01 126 *235 351 *350 *350
 brock200_1.clq 200 14834 74.54 21 *24 *23 *23 *23
 brock200_2.clq 200 9876 49.63 12 13 16 *17 *16
@@ -12,6 +12,16 @@ brock200_3.clq 200 12048 60.54 15 17 *19 *19 *19
 brock200_4.clq 200 13089 65.77 17 20 *20 *20 *19
 brock400_1.clq 400 59723 74.84 27 *23 *22 *22 *21
 brock400_2.clq 400 59786 74.92 29 *23 *22 *21 *21
+brock400_4.clq 400 1 1.0 33 * * * *,
+brock800_1.clq 800 1 1.0 23 * * * *,
+brock800_2.clq 800 1 1.0 24 * * * *,
+brock800_4.clq 800 1 1.0 26 * * * *,
+C2000.9.clq 1 2000 1.0 80 * * * *,
+C4000.5.clq 1 4000 1.0 18 * * * *,
+MANN_a45.clq 1035 1 1.0 345 * * * *,
+MANN_a81.clq 3321 1 1.0 1100 * * * *,
+keller6.clq 1 1 1.0 59 * * * *,
+frb100-40.clq 1 1 1.0 100 * * * *,
 c-fat200-1.clq 200 1534 7.71 12 12 12 12 14
 c-fat200-2.clq 200 3235 16.26 24 24 24 24 24
 c-fat200-5.clq 200 8473 42.58 58 58 58 58 58
@@ -70,7 +80,7 @@ Wiki-Vote.graph 7115 100762 0.3981 17 21 *24 *26 *27
 '''
 config={}
 strans = lambda s: max_value if s.startswith('*') else int(s)
-for line in org_table.splitlines():
+for line in opt_table.splitlines():
     filename, nodenum, edgenum, density, s1, s2, s3, s4, s5 = line.split(' ')
     nodenum = int(nodenum)
     edgenum = int(edgenum)
@@ -83,6 +93,15 @@ for line in org_table.splitlines():
     fileinfo = {'node':nodenum, 'edge':edgenum, 'desity':density, 's1':s1, \
                 's2':s2,'s3':s3,'s4':s4,'s5':s5}
     config[filename] = fileinfo
+#Baulas_list
+Baulas_list  = ['MANN_a27.clq','MANN_a9.clq','brock200_1.clq',
+                'c-fat200-1.clq','c-fat200-2.clq','c-fat500-1.clq',
+                'c-fat500-10.clq','c-fat500-2.clq','c-fat500-5.clq',
+                'hamming6-2.clq','hamming6-4.clq','hamming8-2.clq',
+                'hamming8-4.clq','johnson16-2-4.clq','johnson8-2-4.clq',
+                'johnson8-4-4.clq','keller4.clq']
+hard_clique_list = ['brock400_2.clq','brock400_4.clq', 'brock800_2.clq','brock800_4.clq','C2000.9.clq',\
+         'C4000.5.clq','MANN_a45.clq', 'MANN_a81.clq','keller6.clq','brock800_1.clq']
 #-----------------------------------config----------------------------------
 import os
 import os.path
@@ -91,17 +110,11 @@ import os.path
 srange=[1,2,3,4,5]
 runcnt = 10
 command_file = 'commands.txt'
-#Baulas_list
-select_instances  = ['MANN_a27.clq','MANN_a9.clq','brock200_1.clq',
-               'c-fat200-1.clq','c-fat200-2.clq','c-fat500-1.clq',
-               'c-fat500-10.clq','c-fat500-2.clq','c-fat500-5.clq',
-               'hamming6-2.clq','hamming6-4.clq','hamming8-2.clq',
-               'hamming8-4.clq','johnson16-2-4.clq','johnson8-2-4.clq',
-               'johnson8-4-4.clq','keller4.clq']
+select_instances = hard_clique_list
 
-
-#----------------------------------------------------------------------
 bench_dir = "/home/zhou/splex/benchmarks"
+#----------------------------------------------------------------------
+
 files_dict = {}
 for root, dir, files in os.walk(bench_dir):
     for file in files:
@@ -122,8 +135,11 @@ for f in select_instances:
             pre_time = 'E'
             if config[f]['s%d'%s] == max_value:
                 pre_time = 'H'
-            command =  '%s ./splex -f %s -s %d -r %d -b %d \n'%\
-            (pre_time, fpath, s, runcnt, config[f]['s%d'%s])
+            if f.endswith('graph'):
+                g_size = 2000
+            else:
+                g_size = 4000           
+            command = '%s ./splex -f %s -s %d -r %d -p %d -b %d \n'%(pre_time, fpath, s, runcnt, g_size,config[f]['s%d'%s])
             outf.write(command)
 outf.close()
                                                         
