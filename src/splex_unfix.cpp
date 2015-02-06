@@ -517,7 +517,7 @@ int evaluateVertex(int iter, int vertex, int *inside){
 	for (int i = 0; i < vinfo[vertex].in_deg; i++){
 		int vin = Adj_in(vertex, i);
 		if (inAdjSize[vin] >= 1){
-			for (int i = 0; i < inAdjSize[vin];i++){
+			for (int j = 0; j < inAdjSize[vin];j++){
 				/*Only when two vertices are not connected and their common inside neigbor is a saturated vertex*
 				 * can the two vertices be possible switched inside at the same time*/
 				if (!(cpl_g->matrix[vertex][inAdjMatrix[vin][i]])){
