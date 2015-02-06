@@ -520,9 +520,9 @@ int evaluateVertex(int iter, int vertex, int *inside){
 			for (int j = 0; j < inAdjSize[vin];j++){
 				/*Only when two vertices are not connected and their common inside neigbor is a saturated vertex*
 				 * can the two vertices be possible switched inside at the same time*/
-				if (!(cpl_g->matrix[vertex][inAdjMatrix[vin][i]])){
+				if (!(cpl_g->matrix[vertex][inAdjMatrix[vin][j]])){
 					*inside = vin;
-					return inAdjMatrix[vin][i];
+					return inAdjMatrix[vin][j];
 				}
 			}
 		}
