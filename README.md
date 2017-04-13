@@ -1,6 +1,8 @@
- 
-# splex-big
+splex-big
+======
+
 This is the implementation of FD-TS algorithm for Maximum $s$-plex problem.
+The 2nd dimacs grpahs, 10th dimacs graphs and snap networks are supported.
 
 ## Installation
 call make
