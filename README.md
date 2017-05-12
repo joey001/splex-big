@@ -3,6 +3,7 @@ splex-big
 
 This is the implementation of FD-TS algorithm for Maximum $s$-plex problem.
 The 2nd dimacs grpahs, 10th dimacs graphs and snap networks are supported.
+Please refer to paper "Frequency driven multi-neighborhood tabu search for the maximum s-plex problem. Computers & Operations Research; DOI: 10.1016/j.cor.2017.05.005" for details.
 
 ## Installation
 call make
